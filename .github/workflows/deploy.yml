@@ -42,6 +42,13 @@ jobs:
     - name: Install dependencies
       run: pnpm install
       
+    - name: Install Hexo CLI
+      run: pnpm add -g hexo-cli
+      
+    - name: Install theme dependencies
+      run: |
+        pnpm add hexo-theme-fluid hexo-generator-searchdb hexo-deployer-git moment hexo-util hexo-pagination @adobe/css-tools nunjucks
+      
     - name: Build Hexo
       run: |
         pnpm hexo clean
