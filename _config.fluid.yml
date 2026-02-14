@@ -34,10 +34,11 @@ index:
   banner:
     enable: true
     title: Lumos
-    subtitle: 
-      - Live, travel, adventure, bless, and don't be sorry.
     background: /img/default_bg.png
     height: 100
+  slogan:
+    enable: true
+    text: "Live, travel, adventure, bless, and don't be sorry."
   post:
     default_cover: /img/default_bg.png
     meta:
