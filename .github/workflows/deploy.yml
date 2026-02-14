@@ -48,7 +48,12 @@ jobs:
     - name: Install theme dependencies
       run: |
         pnpm add hexo-theme-fluid hexo-generator-searchdb hexo-deployer-git moment hexo-util hexo-pagination @adobe/css-tools nunjucks
-      
+        
+    - name: Setup theme
+      run: |
+        mkdir -p themes
+        ln -sf ../node_modules/hexo-theme-fluid themes/fluid
+        
     - name: Build Hexo
       run: |
         pnpm hexo clean
