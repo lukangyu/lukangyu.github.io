@@ -1,0 +1,175 @@
+# Fluid 主题配置文件
+
+# ---------------------------
+# 全局配置
+# ---------------------------
+
+# 导航菜单
+navbar:
+  blog_title: Lumos
+  menu:
+    - { key: '首页', link: '/', icon: 'iconfont icon-home-fill' }
+    - { key: '归档', link: '/archives/', icon: 'iconfont icon-archive-fill' }
+    - { key: '分类', link: '/categories/', icon: 'iconfont icon-category-fill' }
+    - { key: '标签', link: '/tags/', icon: 'iconfont icon-tags-fill' }
+    - { key: '关于', link: '/about/', icon: 'iconfont icon-user-fill' }
+
+# 路径配置
+routes:
+  tags: '/tags/'
+  categories: '/categories/'
+
+# ---------------------------
+# 主题风格配置
+# ---------------------------
+
+# 主题切换：跟随系统
+color: auto
+
+# ---------------------------
+# 首页配置
+# ---------------------------
+
+index:
+  banner:
+    enable: true
+    title: Lumos
+    subtitle: 
+      - 探索 · 记录 · 分享
+    background: /img/default_bg.png
+    height: 100
+  post:
+    default_cover: /img/default_bg.png
+    meta:
+      author: true
+      date: true
+      category: true
+      wordcount: true
+      min2read: true
+
+# ---------------------------
+# 文章页配置
+# ---------------------------
+
+post:
+  banner:
+    enable: true
+    background: /img/default_bg.png
+  default_cover: /img/default_bg.png
+  meta:
+    author: true
+    date: true
+    category: true
+    tag: true
+    wordcount: true
+    min2read: true
+  toc:
+    enable: true
+    expand: true
+  copyright:
+    enable: true
+    content: '本文作者：Lu<br>本文链接：[url]<br>版权声明：本博客所有文章除特别声明外，均采用 CC BY-NC-SA 4.0 许可协议。转载请注明出处！'
+  math:
+    enable: true
+    specific: false
+    engine: katex
+
+# ---------------------------
+# 归档页配置
+# ---------------------------
+
+archive:
+  banner:
+    enable: true
+    background: /img/default_bg.png
+    title: 归档
+
+# ---------------------------
+# 分类页配置
+# ---------------------------
+
+category:
+  enable: true
+  banner:
+    enable: true
+    background: /img/default_bg.png
+    title: 分类
+
+# ---------------------------
+# 标签页配置
+# ---------------------------
+
+tag:
+  enable: true
+  banner:
+    enable: true
+    background: /img/default_bg.png
+    title: 标签
+
+# ---------------------------
+# 关于页配置
+# ---------------------------
+
+about:
+  enable: true
+  banner:
+    enable: true
+    background: /img/default_bg.png
+    title: 关于
+  avatar: /img/avatar.png
+  name: Lu
+  intro: 探索技术，记录成长
+
+# ---------------------------
+# 页脚配置
+# ---------------------------
+
+footer:
+  content: '
+    <a href="https://hexo.io" target="_blank" rel="nofollow noopener"><span>Hexo</span></a>
+    <i class="iconfont icon-love"></i>
+    <a href="https://github.com/fluid-dev/hexo-theme-fluid" target="_blank" rel="nofollow noopener"><span>Fluid</span></a>
+  '
+  copyyear: 2025
+  statistics: true
+  busuanzi: true
+  startyear: 2025
+
+# ---------------------------
+# 社交链接
+# ---------------------------
+
+social:
+  enable: true
+  links:
+    - { key: 'GitHub', link: 'https://github.com/lukangyu', icon: 'iconfont icon-github-fill' }
+
+# ---------------------------
+# 搜索配置
+# ---------------------------
+
+search:
+  enable: true
+  path: /local-search.xml
+  field: post
+  content: true
+  format: html
+
+# ---------------------------
+# 代码块配置
+# ---------------------------
+
+code:
+  copy_btn: true
+  highlight:
+    enable: true
+    line_number: true
+    prettify: false
+
+# ---------------------------
+# 评论系统（可选）
+# ---------------------------
+
+comments:
+  enable: false
+  type: ''
