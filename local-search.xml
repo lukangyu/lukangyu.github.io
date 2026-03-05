@@ -17,6 +17,29 @@
   
   
   <entry>
+    <title>一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复</title>
+    <link href="/post/flash-consistency-issue-exposed-by-a-5-200-concurrent-stress-test-from-redis-has-been-21axl2.html"/>
+    <url>/post/flash-consistency-issue-exposed-by-a-5-200-concurrent-stress-test-from-redis-has-been-21axl2.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="一次-5-200-并发压测暴露的秒杀一致性问题：从“Redis-已扣减但-DB-未落库”到可复现修复"><a href="#一次-5-200-并发压测暴露的秒杀一致性问题：从“Redis-已扣减但-DB-未落库”到可复现修复" class="headerlink" title="一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复"></a>一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>这次排查不是从线上报警开始，而是从一次标准化压测开始。链路是典型的秒杀实现：请求先走 Redis Lua 脚本做资格校验与扣减，再把订单事件写入 Redis Stream，最后由异步消费线程落 MySQL。目标很明确：验证在高并发下是否满足不超卖、一人一单，以及 Redis 与 DB 的最终一致。</p><p>压测参数是 <code>5,200</code>​ 并发请求，<code>1,000</code>​ 唯一用户。第一次跑完后出现了一个非常关键、但容易被忽视的信号：业务成功数是 <code>1000</code>​，数据库订单数是 <code>999</code>​，Redis 库存为 <code>0</code>​，DB 库存却为 <code>1</code>。这个“差 1”不是偶然噪声，而是异步链路出现了实质性丢单。</p><hr><h2 id="问题是怎么被发现的"><a href="#问题是怎么被发现的" class="headerlink" title="问题是怎么被发现的"></a>问题是怎么被发现的</h2><p>  我没有先改代码，而是先把证据链拉齐：压测统计、SQL 对账、Redis 库存、应用日志四份数据必须互相能解释。<br>  一旦把这四份数据对上，问题就非常清楚了：系统并没有超卖，但存在“Redis 已成功扣减，DB 未成功落单”的不一致窗口。</p><p>  随后日志给出两条直接线索：</p><ol><li>消费线程出现 <code>NullPointerException</code>​，调用点在 <code>proxy.createVoucherOrder(...)</code>。</li><li>日志里出现过 <code>userId: null</code> 的订单消费异常。</li></ol><p>  这两条线索指向两个不同层面的缺陷：一个是并发竞态，一个是消息污染。再往下看事务逻辑，还存在第三个风险点：DB 扣库存失败后没有阻断后续下单。</p><hr><h2 id="底层原理：为什么会出现这些问题"><a href="#底层原理：为什么会出现这些问题" class="headerlink" title="底层原理：为什么会出现这些问题"></a>底层原理：为什么会出现这些问题</h2><h3 id="1-并发竞态：AopContext-currentProxy-懒赋值-异步线程读取"><a href="#1-并发竞态：AopContext-currentProxy-懒赋值-异步线程读取" class="headerlink" title="1) 并发竞态：AopContext.currentProxy() 懒赋值 + 异步线程读取"></a>1) 并发竞态：<code>AopContext.currentProxy()</code> 懒赋值 + 异步线程读取</h3><p>  原实现把 <code>proxy</code>​ 放在请求线程里通过 <code>AopContext.currentProxy()</code> 懒赋值，然后异步消费线程直接使用这个共享字段。<br>  这个设计的底层问题有两层：</p><p>  第一层是生命周期错位。消费线程在服务启动后就持续运行，而 <code>proxy</code>​ 的初始化依赖“某次请求先到”，这本身就把系统正确性绑在了请求时序上。<br>  第二层是并发可见性问题。这个共享可变字段没有受控发布（没有明确 happens-before 保证），在高并发下消费线程可能先读到 <code>null</code>，导致空指针，最终形成“Redis 扣减了但 DB 没落单”。</p><h3 id="2-消息语义污染：Stream-初始化记录被当业务订单消费"><a href="#2-消息语义污染：Stream-初始化记录被当业务订单消费" class="headerlink" title="2) 消息语义污染：Stream 初始化记录被当业务订单消费"></a>2) 消息语义污染：Stream 初始化记录被当业务订单消费</h3><p>  为了创建 Stream，初始化逻辑写了一条 <code>type=init</code>​ 记录。这条记录在 Redis 语义上就是一条普通消息。<br>  消费端又是按 <code>VoucherOrder</code>​ 结构反序列化，如果消息缺失 <code>userId/voucherId/id</code> 等字段，就会得到空值对象。继续往下走锁和下单逻辑，必然引发异常或脏流程。<br>  本质上这是“控制消息和业务消息没有隔离”导致的消费污染。</p><h3 id="3-事务保护不足：DB-扣库存失败没有及时中止"><a href="#3-事务保护不足：DB-扣库存失败没有及时中止" class="headerlink" title="3) 事务保护不足：DB 扣库存失败没有及时中止"></a>3) 事务保护不足：DB 扣库存失败没有及时中止</h3><p>  <code>update ... set stock = stock - 1 where stock &gt; 0</code>​ 本质是乐观条件更新（CAS 语义）。它返回 <code>false</code>​ 就表示本次库存扣减没有成功。<br>  如果这一步失败却仍继续 <code>save(order)</code>，会制造“库存状态与订单状态分叉”的一致性风险。即使概率低，也必须作为硬约束处理。</p><hr><h2 id="修复思路与步骤"><a href="#修复思路与步骤" class="headerlink" title="修复思路与步骤"></a>修复思路与步骤</h2><p>  修复的原则是：先修结构性问题，再做性能优化；先保证一致性，再谈吞吐。</p><p>  第一步，把 <code>proxy</code>​ 从“请求线程懒赋值”改成“容器注入稳定引用”，彻底移除时序依赖。<br>  第二步，在消费入口增加消息完整性校验，非法消息直接丢弃并告警。<br>  第三步，在事务方法里把 <code>success</code> 作为硬门闩，扣库存失败立即返回，不允许继续落订单。</p><hr><h2 id="这次排查方法为什么有效"><a href="#这次排查方法为什么有效" class="headerlink" title="这次排查方法为什么有效"></a>这次排查方法为什么有效</h2><p>  真正起作用的不是某个技巧，而是排查顺序正确：<br>  先复现，再定位；<br>  先修一致性，再跑性能；<br>  每次只改一层并回归验证。</p><p>  这种方式可以避免“边猜边改”的低效循环，尤其适合异步系统。</p><h2 id="以后如何避免同类问题"><a href="#以后如何避免同类问题" class="headerlink" title="以后如何避免同类问题"></a>以后如何避免同类问题</h2><p>  我把这次经验沉淀为三条工程约束：</p><ol><li>任何异步消费者依赖都必须是容器稳定注入，禁止请求路径懒初始化共享状态。</li><li>消息队列必须有明确消息契约，控制消息与业务消息分流；消费入口先做结构校验再执行业务。</li><li>所有条件更新（如扣库存）都必须检查返回值，失败时立即终止后续状态写入。</li></ol><p>  再补一句最重要的：压测不能只看 TPS 和 P95，必须带 SQL + Redis 对账。<br>  没有对账，所有“高性能”都可能只是统计幻觉。</p><h2 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h2><p>  这次问题本质上不是 Redis、MySQL 或 Stream 的单点故障，而是并发时序、消息语义和事务边界三者叠加造成的一致性缺口。<br>  修复的关键也不是“补一个 if”，而是把系统从“偶尔正确”改成“可证明正确”。</p><p>  这也是后端工程里最值得投入的能力：当并发上来时，系统还能按你设计的方式工作，而不是按运气工作。</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>后端</tag>
+      
+      <tag>并发</tag>
+      
+      <tag>秒杀</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
     <title>理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相</title>
     <link href="/post/is-the-theoretically-better-o-nk-slower-a-counterintuitive-truth-i-discovered-on-leetcode-zdaouu.html"/>
     <url>/post/is-the-theoretically-better-o-nk-slower-a-counterintuitive-truth-i-discovered-on-leetcode-zdaouu.html</url>
