@@ -5,12 +5,35 @@
   
   <entry>
     <title>Hello World</title>
-    <link href="/2026/03/05/hello-world/"/>
-    <url>/2026/03/05/hello-world/</url>
+    <link href="/2026/03/07/hello-world/"/>
+    <url>/2026/03/07/hello-world/</url>
     
     <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo new <span class="hljs-string">&quot;My New Post&quot;</span><br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo server<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo generate<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><code class="hljs bash">$ hexo deploy<br></code></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>]]></content>
     
     
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>0128.最长连续序列</title>
+    <link href="/post/0128the-longest-continuous-sequence-zkkbjv.html"/>
+    <url>/post/0128the-longest-continuous-sequence-zkkbjv.html</url>
+    
+    <content type="html"><![CDATA[<h1 id="0128-最长连续序列"><a href="#0128-最长连续序列" class="headerlink" title="0128.最长连续序列"></a>0128.最长连续序列</h1><p>看到这个题目的第一眼想到的自然是排序算法，直接排序遍历，但是复杂度达到了o(nlogn)，不符合题目所要求的o(n)。</p><p>对于n复杂度的算法，我第一个想到的是使用哈希map，直接遍历一遍数组，对于每个数字，查找当前数字的「前驱连续长度」（即num-1 所在序列的长度）和后继长度。</p><p>如果当前数字未被计算过（这是由于可能出现重复数字），那么就可以合并前后续列长度，并且更新左右边界长度。</p><p>看到这里大家可能会有疑问，为什么只需要更新左右边界长度呢？</p><p>这是由于每次遇到新的数字时，只有边界的数字会参与计算，中间数字对应哈希值不会被使用到，所以无需更新，且一定小于边界值，不会影响答案。</p><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> <span class="hljs-title function_">longestConsecutive</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">ans</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        unordered_map&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt; map;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span>&amp; num : nums) &#123;<br>            <span class="hljs-comment">// 1. 查找当前数字的「前驱连续长度」：num-1 所在序列的长度</span><br>            <span class="hljs-type">int</span> <span class="hljs-variable">prev</span> <span class="hljs-operator">=</span> map.find(num - <span class="hljs-number">1</span>) == map.end() ? <span class="hljs-number">0</span> : map[num - <span class="hljs-number">1</span>];<br>            <span class="hljs-comment">// 2. 查找当前数字的「后继连续长度」：num+1 所在序列的长度</span><br>            <span class="hljs-type">int</span> <span class="hljs-variable">suf</span> <span class="hljs-operator">=</span> map.find(num + <span class="hljs-number">1</span>) == map.end() ? <span class="hljs-number">0</span> : map[num + <span class="hljs-number">1</span>];<br>            <span class="hljs-comment">// 3. 仅当数字未被处理过时（避免重复计算）</span><br>            <span class="hljs-keyword">if</span> (map.find(num) == map.end()) &#123;<br>                <span class="hljs-comment">// 4. 合并前后序列：当前数字的序列长度 = 前驱 + 后继 + 自身（1）</span><br>                map[num] += prev + suf + <span class="hljs-number">1</span>;<br>                <span class="hljs-comment">// 5. 更新序列「左边界」的长度（关键！）</span><br>                map[num - prev] = map[num];<br>                <span class="hljs-comment">// 6. 更新序列「右边界」的长度（关键！）</span><br>                map[num + suf] = map[num];<br>ans = max(ans,map[num]);<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> ans;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure><p>‍</p><p>接下来如果要理解如何从第一个哈希表（记录长度）的算法，转化为题解的哈希集合（找连续序列起点）的算法，核心是<strong>换一种思路解决「最长连续序列」问题</strong>—— 从「合并序列」转向「找序列起点并统计长度」。</p><p>第一个算法的核心是「动态合并」：遍历每个数字时，合并其前后的连续序列，并用哈希表记录序列长度（仅更新边界）。但这个思路有两个「不直观」的点：</p><ol><li>需要处理「重复数字」（<code>map.find(num) == map.end()</code>）；</li><li>要维护「序列边界的长度」，逻辑上需要理解「为什么只更新边界」；</li></ol><p>我们可以思考：有没有更直接的方式？——<strong>既然是「连续序列」，那每个序列都有唯一的「起点」（即没有前驱数</strong> <strong>​<code>x-1</code>​</strong>​ <strong>的数），只要找到所有起点，再逐个统计以该起点开头的连续序列长度即可</strong>。这就是第二个算法的核心思路，大部分是这种思路，就不过多赘述了。</p><p>‍</p>]]></content>
+    
+    
+    
+    <tags>
+      
+      <tag>leetcode</tag>
+      
+      <tag>数据结构与算法</tag>
+      
+      <tag>算法</tag>
+      
+    </tags>
     
   </entry>
   
@@ -50,11 +73,11 @@
     
     <tags>
       
-      <tag>算法</tag>
+      <tag>leetcode</tag>
       
       <tag>数据结构与算法</tag>
       
-      <tag>leetcode</tag>
+      <tag>算法</tag>
       
     </tags>
     

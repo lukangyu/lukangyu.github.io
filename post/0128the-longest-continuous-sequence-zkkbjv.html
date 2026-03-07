@@ -19,15 +19,15 @@
   <meta name="author" content="Lu">
   <meta name="keywords" content="博客,技术,编程,Lu">
   
-    <meta name="description" content="理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相刷字母异位词分组这道题时，很多人都会遇到一个特别反直觉的现象： 书本上明明白白写着，计数法时间复杂度 O(nk)，严格优于排序法 O(nk log k)。可一上 LeetCode 提交，排序版代码跑得反而更快。 我一开始也以为是自己写得不够好，反复对比、优化之后才明白：这不是代码问题，是理论复杂度和真实运行环境之间的">
+    <meta name="description" content="0128.最长连续序列看到这个题目的第一眼想到的自然是排序算法，直接排序遍历，但是复杂度达到了o(nlogn)，不符合题目所要求的o(n)。 对于n复杂度的算法，我第一个想到的是使用哈希map，直接遍历一遍数组，对于每个数字，查找当前数字的「前驱连续长度」（即num-1 所在序列的长度）和后继长度。 如果当前数字未被计算过（这是由于可能出现重复数字），那么就可以合并前后续列长度，并且更新左右边界长">
 <meta property="og:type" content="article">
-<meta property="og:title" content="理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相">
-<meta property="og:url" content="https://lukangyu.github.io/post/is-the-theoretically-better-o-nk-slower-a-counterintuitive-truth-i-discovered-on-leetcode-zdaouu.html">
+<meta property="og:title" content="0128.最长连续序列">
+<meta property="og:url" content="https://lukangyu.github.io/post/0128the-longest-continuous-sequence-zkkbjv.html">
 <meta property="og:site_name" content="Lumos">
-<meta property="og:description" content="理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相刷字母异位词分组这道题时，很多人都会遇到一个特别反直觉的现象： 书本上明明白白写着，计数法时间复杂度 O(nk)，严格优于排序法 O(nk log k)。可一上 LeetCode 提交，排序版代码跑得反而更快。 我一开始也以为是自己写得不够好，反复对比、优化之后才明白：这不是代码问题，是理论复杂度和真实运行环境之间的">
+<meta property="og:description" content="0128.最长连续序列看到这个题目的第一眼想到的自然是排序算法，直接排序遍历，但是复杂度达到了o(nlogn)，不符合题目所要求的o(n)。 对于n复杂度的算法，我第一个想到的是使用哈希map，直接遍历一遍数组，对于每个数字，查找当前数字的「前驱连续长度」（即num-1 所在序列的长度）和后继长度。 如果当前数字未被计算过（这是由于可能出现重复数字），那么就可以合并前后续列长度，并且更新左右边界长">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2026-03-05T03:08:57.000Z">
-<meta property="article:modified_time" content="2026-03-05T03:23:14.000Z">
+<meta property="article:published_time" content="2026-03-07T03:18:48.000Z">
+<meta property="article:modified_time" content="2026-03-07T03:40:52.000Z">
 <meta property="article:author" content="Lu">
 <meta property="article:tag" content="leetcode">
 <meta property="article:tag" content="数据结构与算法">
@@ -36,7 +36,7 @@
   
   
   
-  <title>理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相 - Lumos</title>
+  <title>0128.最长连续序列 - Lumos</title>
 
   <link  rel="stylesheet" href="https://lib.baomitu.com/twitter-bootstrap/4.6.1/css/bootstrap.min.css" />
 
@@ -204,7 +204,7 @@
       <div class="banner-text text-center fade-in-up">
         <div class="h2">
           
-            <span id="subtitle" data-typed-text="理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相"></span>
+            <span id="subtitle" data-typed-text="0128.最长连续序列"></span>
           
         </div>
 
@@ -252,58 +252,26 @@
       <div class="container nopadding-x-md" id="board-ctn">
         <div id="board">
           <article class="post-content mx-auto">
-            <h1 id="seo-header">理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相</h1>
+            <h1 id="seo-header">0128.最长连续序列</h1>
             
             
               <div class="markdown-body">
                 
-                <h1 id="理论更优的-O-nk-反而更慢？我在-LeetCode-上发现的一个反常识真相"><a href="#理论更优的-O-nk-反而更慢？我在-LeetCode-上发现的一个反常识真相" class="headerlink" title="理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相"></a>理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相</h1><p>刷字母异位词分组这道题时，很多人都会遇到一个特别反直觉的现象：</p>
-<p>书本上明明白白写着，计数法时间复杂度 O(nk)，严格优于排序法 O(nk log k)。<br>可一上 LeetCode 提交，<strong>排序版代码跑得反而更快</strong>。</p>
-<p>我一开始也以为是自己写得不够好，反复对比、优化之后才明白：<br>这不是代码问题，是<strong>理论复杂度和真实运行环境</strong>之间的巨大差距。</p>
-<hr>
-<h2 id="你以为的优势，在短字符串面前不存在"><a href="#你以为的优势，在短字符串面前不存在" class="headerlink" title="你以为的优势，在短字符串面前不存在"></a>你以为的优势，在短字符串面前不存在</h2><p>算法复杂度看的是增长趋势，不看常数开销。<br>但 LeetCode 里的测试用例，绝大多数字符串都特别短，长度大多在 20 以内。</p>
-<p>在这种长度下：</p>
-<ul>
-<li>排序 O(k log k) 实际只有几十次操作</li>
-<li>计数 O(k) 虽然理论更优，却要多一轮统计、一轮拼接</li>
-</ul>
-<p>两者的真实计算量几乎拉不开差距，复杂度优势直接被抹平。</p>
-<p>更关键的是，<strong>std::sort 是被优化到极致的库函数</strong>。<br>它不是简单的快排，而是快排、堆排、插入排序结合的 introsort，短序列直接走最快的插入排序，再加上编译器向量化、连续内存访问，CPU 缓存命中率拉满。</p>
-<p>你手写的计数循环，再怎么精简，也很难打过几十年工程级优化的库函数。</p>
-<hr>
-<h2 id="计数法真正的坑：Key-拼接的隐形开销"><a href="#计数法真正的坑：Key-拼接的隐形开销" class="headerlink" title="计数法真正的坑：Key 拼接的隐形开销"></a>计数法真正的坑：Key 拼接的隐形开销</h2><p>排序法的 key 就是排序后的字符串，一段干净、连续的字符数组，哈希和比较都极快。</p>
-<p>而常规计数法，大多是这样生成 key：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><code class="hljs cpp">string key;<br><span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> x : cnt) key += <span class="hljs-built_in">to_string</span>(x) + <span class="hljs-string">&quot;#&quot;</span>;<br></code></pre></td></tr></table></figure>
+                <h1 id="0128-最长连续序列"><a href="#0128-最长连续序列" class="headerlink" title="0128.最长连续序列"></a>0128.最长连续序列</h1><p>看到这个题目的第一眼想到的自然是排序算法，直接排序遍历，但是复杂度达到了o(nlogn)，不符合题目所要求的o(n)。</p>
+<p>对于n复杂度的算法，我第一个想到的是使用哈希map，直接遍历一遍数组，对于每个数字，查找当前数字的「前驱连续长度」（即num-1 所在序列的长度）和后继长度。</p>
+<p>如果当前数字未被计算过（这是由于可能出现重复数字），那么就可以合并前后续列长度，并且更新左右边界长度。</p>
+<p>看到这里大家可能会有疑问，为什么只需要更新左右边界长度呢？</p>
+<p>这是由于每次遇到新的数字时，只有边界的数字会参与计算，中间数字对应哈希值不会被使用到，所以无需更新，且一定小于边界值，不会影响答案。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    <span class="hljs-type">int</span> <span class="hljs-title function_">longestConsecutive</span><span class="hljs-params">(vector&lt;<span class="hljs-type">int</span>&gt;&amp; nums)</span> &#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">ans</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        unordered_map&lt;<span class="hljs-type">int</span>, <span class="hljs-type">int</span>&gt; map;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span>&amp; num : nums) &#123;<br>            <span class="hljs-comment">// 1. 查找当前数字的「前驱连续长度」：num-1 所在序列的长度</span><br>            <span class="hljs-type">int</span> <span class="hljs-variable">prev</span> <span class="hljs-operator">=</span> map.find(num - <span class="hljs-number">1</span>) == map.end() ? <span class="hljs-number">0</span> : map[num - <span class="hljs-number">1</span>];<br>            <span class="hljs-comment">// 2. 查找当前数字的「后继连续长度」：num+1 所在序列的长度</span><br>            <span class="hljs-type">int</span> <span class="hljs-variable">suf</span> <span class="hljs-operator">=</span> map.find(num + <span class="hljs-number">1</span>) == map.end() ? <span class="hljs-number">0</span> : map[num + <span class="hljs-number">1</span>];<br>            <span class="hljs-comment">// 3. 仅当数字未被处理过时（避免重复计算）</span><br>            <span class="hljs-keyword">if</span> (map.find(num) == map.end()) &#123;<br>                <span class="hljs-comment">// 4. 合并前后序列：当前数字的序列长度 = 前驱 + 后继 + 自身（1）</span><br>                map[num] += prev + suf + <span class="hljs-number">1</span>;<br>                <span class="hljs-comment">// 5. 更新序列「左边界」的长度（关键！）</span><br>                map[num - prev] = map[num];<br>                <span class="hljs-comment">// 6. 更新序列「右边界」的长度（关键！）</span><br>                map[num + suf] = map[num];<br>				ans = max(ans,map[num]);<br>            &#125;<br>        &#125;<br>        <span class="hljs-keyword">return</span> ans;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
 
-<p>这里面藏着巨大的开销：数字转字符串、字符串拼接、多次内存操作、非连续访问。</p>
-<p>在字符串很短的场景里，<strong>拼接 key 的开销，甚至超过排序本身</strong>。<br>你以为自己在 O(k)，其实是在 O(k + 巨大常数)。</p>
-<p>再加上哈希表对长而零散的字符串 key 本身就不友好，一套组合下来，计数法自然慢了。</p>
-<hr>
-<h2 id="让计数法真正快起来：自定义哈希-数组Key"><a href="#让计数法真正快起来：自定义哈希-数组Key" class="headerlink" title="让计数法真正快起来：自定义哈希+数组Key"></a>让计数法真正快起来：自定义哈希+数组Key</h2><p>如果想让计数法发挥出 O(nk) 的理论优势，核心是<strong>干掉字符串拼接</strong>——直接用固定大小的数组做哈希表的 Key，搭配自定义哈希函数，彻底规避字符串操作的开销。</p>
-<p>完整实现代码如下：</p>
-<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><code class="hljs cpp"><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;vector&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;string&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;unordered_map&gt;</span></span><br><span class="hljs-meta">#<span class="hljs-keyword">include</span> <span class="hljs-string">&lt;array&gt;</span></span><br><br><span class="hljs-keyword">using</span> <span class="hljs-keyword">namespace</span> std;<br><br><span class="hljs-comment">// 自定义哈希函数：针对26位int数组，生成唯一哈希值</span><br><span class="hljs-keyword">struct</span> <span class="hljs-title class_">ArrayHash</span> &#123;<br>    <span class="hljs-function"><span class="hljs-type">size_t</span> <span class="hljs-title">operator</span><span class="hljs-params">()</span><span class="hljs-params">(<span class="hljs-type">const</span> array&lt;<span class="hljs-type">int</span>, <span class="hljs-number">26</span>&gt;&amp; arr)</span> <span class="hljs-type">const</span> </span>&#123;<br>        <span class="hljs-type">size_t</span> hash = <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">int</span> num : arr) &#123;<br>            <span class="hljs-comment">// 31是质数，减少哈希碰撞概率</span><br>            hash = hash * <span class="hljs-number">31</span> + num;<br>        &#125;<br>        <span class="hljs-keyword">return</span> hash;<br>    &#125;<br>&#125;;<br><br><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br><span class="hljs-keyword">public</span>:<br>    vector&lt;vector&lt;string&gt;&gt; <span class="hljs-built_in">groupAnagrams</span>(vector&lt;string&gt;&amp; strs) &#123;<br>        <span class="hljs-comment">// Key直接用26位int数组，替代拼接的字符串</span><br>        unordered_map&lt;array&lt;<span class="hljs-type">int</span>, 26&gt;, vector&lt;string&gt;, ArrayHash&gt; mp;<br>        mp.<span class="hljs-built_in">reserve</span>(strs.<span class="hljs-built_in">size</span>()); <span class="hljs-comment">// 预分配内存，减少扩容开销</span><br><br>        <span class="hljs-keyword">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; s : strs) &#123;<br>            array&lt;<span class="hljs-type">int</span>, 26&gt; cnt = &#123;<span class="hljs-number">0</span>&#125;; <span class="hljs-comment">// 栈上数组，无内存分配开销</span><br>            <span class="hljs-keyword">for</span> (<span class="hljs-type">char</span> c : s) cnt[c - <span class="hljs-string">&#x27;a&#x27;</span>]++;<br>            <span class="hljs-comment">// 直接用数组做Key，无任何拼接操作</span><br>            mp[cnt].<span class="hljs-built_in">push_back</span>(s);<br>        &#125;<br><br>        vector&lt;vector&lt;string&gt;&gt; res;<br>        res.<span class="hljs-built_in">reserve</span>(mp.<span class="hljs-built_in">size</span>());<br>        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">auto</span>&amp; [_, vec] : mp) &#123;<br>            res.<span class="hljs-built_in">push_back</span>(<span class="hljs-built_in">move</span>(vec)); <span class="hljs-comment">// 移动语义，避免拷贝</span><br>        &#125;<br>        <span class="hljs-keyword">return</span> res;<br>    &#125;<br>&#125;;<br></code></pre></td></tr></table></figure>
-
-<p>这种写法的核心优化点：</p>
+<p>‍</p>
+<p>接下来如果要理解如何从第一个哈希表（记录长度）的算法，转化为题解的哈希集合（找连续序列起点）的算法，核心是<strong>换一种思路解决「最长连续序列」问题</strong>—— 从「合并序列」转向「找序列起点并统计长度」。</p>
+<p>第一个算法的核心是「动态合并」：遍历每个数字时，合并其前后的连续序列，并用哈希表记录序列长度（仅更新边界）。但这个思路有两个「不直观」的点：</p>
 <ol>
-<li>用 <code>array&lt;int,26&gt;</code> 替代字符串作为 Key，彻底去掉字符串拼接、数字转字符串的开销；</li>
-<li>自定义哈希函数直接对数组计算哈希值，避免字符串哈希的额外消耗；</li>
-<li>数组是栈上连续内存，CPU 缓存友好，哈希计算和 Key 比较效率大幅提升。</li>
+<li>需要处理「重复数字」（<code>map.find(num) == map.end()</code>）；</li>
+<li>要维护「序列边界的长度」，逻辑上需要理解「为什么只更新边界」；</li>
 </ol>
-<p>这种优化后的计数法，在字符串长度中等（k&gt;30）时，就能反超排序法；但是短字符串场景，仍然落后于排序法，无法彻底解决常规计数法“慢”的问题。</p>
-<p>优化后的计数法只能在测试上达到8ms，而最快的排序法可以达到3ms，这主要就是对应的场景不同，所以要根据对应的场景选择对应的算法</p>
-<hr>
-<h2 id="那计数法什么时候才真的快？"><a href="#那计数法什么时候才真的快？" class="headerlink" title="那计数法什么时候才真的快？"></a>那计数法什么时候才真的快？</h2><p>只有字符串真的很长时（比如长度上百），排序的 log k 级别开销才会被彻底放大，计数法的线性优势才会体现出来。</p>
-<p>但在 LeetCode 这道题里，几乎没有这种用例，所以常规场景下，排序版依然是“性价比最高”的选择——简洁、稳健、不易出错。</p>
-<hr>
-<h2 id="这道题真正教会我们的"><a href="#这道题真正教会我们的" class="headerlink" title="这道题真正教会我们的"></a>这道题真正教会我们的</h2><p>这件事给我的启发特别简单：</p>
-<p>复杂度是理论，常数项才是现实。<br>手写算法不一定比库函数强，LeetCode 的运行速度，很多时候比的不是复杂度高低，而是<strong>你有多懂机器、缓存、内存和标准库</strong>。</p>
-<p>所以下次再写这道题：</p>
-<ul>
-<li>面试求稳，直接写排序版，简洁高效不出错；</li>
-<li>想展示深度，再用“自定义哈希+数组Key”的计数版；</li>
-<li>千万别写带字符串拼接的朴素计数法，又慢又啰嗦。</li>
-</ul>
-<p>理论再漂亮，也要落地到真实机器上，才算真正懂算法。</p>
+<p>我们可以思考：有没有更直接的方式？——<strong>既然是「连续序列」，那每个序列都有唯一的「起点」（即没有前驱数</strong> <strong>​<code>x-1</code>​</strong>​ <strong>的数），只要找到所有起点，再逐个统计以该起点开头的连续序列长度即可</strong>。这就是第二个算法的核心思路，大部分是这种思路，就不过多赘述了。</p>
 <p>‍</p>
 
                 
@@ -333,8 +301,8 @@
 
   <div class="license-box my-3">
     <div class="license-title">
-      <div>理论更优的 O (nk) 反而更慢？我在 LeetCode 上发现的一个反常识真相</div>
-      <div>https://lukangyu.github.io/post/is-the-theoretically-better-o-nk-slower-a-counterintuitive-truth-i-discovered-on-leetcode-zdaouu.html</div>
+      <div>0128.最长连续序列</div>
+      <div>https://lukangyu.github.io/post/0128the-longest-continuous-sequence-zkkbjv.html</div>
     </div>
     <div class="license-meta">
       
@@ -346,7 +314,7 @@
       
         <div class="license-meta-item license-meta-date">
           <div>发布于</div>
-          <div>2026年3月5日</div>
+          <div>2026年3月7日</div>
         </div>
       
       
@@ -378,9 +346,9 @@
                   <article class="post-prev col-6">
                     
                     
-                      <a href="/post/flash-consistency-issue-exposed-by-a-5-200-concurrent-stress-test-from-redis-has-been-21axl2.html" title="一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复">
+                      <a href="/2026/03/07/hello-world/" title="Hello World">
                         <i class="iconfont icon-arrowleft"></i>
-                        <span class="hidden-mobile">一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复</span>
+                        <span class="hidden-mobile">Hello World</span>
                         <span class="visible-mobile">上一篇</span>
                       </a>
                     
@@ -388,8 +356,8 @@
                   <article class="post-next col-6">
                     
                     
-                      <a href="/post/comprehensive-technical-analysis-report-on-the-multipart-upload-process-be82v.html" title="分片上传流程全面技术分析报告">
-                        <span class="hidden-mobile">分片上传流程全面技术分析报告</span>
+                      <a href="/post/flash-consistency-issue-exposed-by-a-5-200-concurrent-stress-test-from-redis-has-been-21axl2.html" title="一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复">
+                        <span class="hidden-mobile">一次 5,200 并发压测暴露的秒杀一致性问题：从“Redis 已扣减但 DB 未落库”到可复现修复</span>
                         <span class="visible-mobile">下一篇</span>
                         <i class="iconfont icon-arrowright"></i>
                       </a>
